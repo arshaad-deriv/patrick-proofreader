@@ -118,31 +118,35 @@ def split_doc_into_chunks(doc_file, pages_per_chunk=5) -> List[Dict[str, Any]]:
     logger.info(f"DOC/DOCX chunking complete. Created {len(chunks)} chunks")
     return chunks
 
-def check_translation_openai(text: str, target_language: str, chunk_id: int) -> Dict[str, Any]:
+def check_translation_openai(text: str, target_language: str, chunk_id: int, custom_prompt: str = None) -> Dict[str, Any]:
     """Use OpenAI GPT-4 to check translation quality."""
     logger.info(f"Starting OpenAI analysis for {target_language} translation (Chunk {chunk_id})")
     
-    prompt = f"""
-    Please analyze the following text and check if it is properly translated to {target_language}. 
-    Look for:
-    1. Untranslated words or phrases
-    2. Poor grammar or syntax
-    3. Inconsistent terminology
-    4. Mixed languages within sentences
-    
-    For each issue found, please specify:
-    - The exact problematic text
-    - What the issue is (untranslated, grammar error, etc.)
-    - A suggested correction if applicable
-    
-    IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
-    "Quality Score: XX%"
-    
-    If no issues are found, respond with "No translation issues found. Quality Score: 100%"
-    
-    Text to analyze:
-    {text}
-    """
+    # Use custom prompt if provided, otherwise use default
+    if custom_prompt:
+        prompt = custom_prompt.format(text=text)
+    else:
+        prompt = f"""
+        Please analyze the following text and check if it is properly translated to {target_language}. 
+        Look for:
+        1. Untranslated words or phrases
+        2. Poor grammar or syntax
+        3. Inconsistent terminology
+        4. Mixed languages within sentences
+        
+        For each issue found, please specify:
+        - The exact problematic text
+        - What the issue is (untranslated, grammar error, etc.)
+        - A suggested correction if applicable
+        
+        IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+        "Quality Score: XX%"
+        
+        If no issues are found, respond with "No translation issues found. Quality Score: 100%"
+        
+        Text to analyze:
+        {text}
+        """
     
     try:
         logger.info(f"Sending request to OpenAI API (Chunk {chunk_id})")
@@ -182,50 +186,76 @@ def check_translation_openai(text: str, target_language: str, chunk_id: int) -> 
             'chunk_id': chunk_id
         }
 
-def check_translation_claude(text: str, target_language: str, chunk_id: int) -> Dict[str, Any]:
+def check_translation_claude(text: str, target_language: str, chunk_id: int, custom_prompt: str = None) -> Dict[str, Any]:
     """Use Claude to check translation quality."""
     logger.info(f"Starting Claude analysis for {target_language} translation (Chunk {chunk_id})")
     
-    if target_language == "French":
-        prompt = f"""
-        Please analyze the following text and check if it is properly translated to French.
-        Look for:
-        - Untranslated English words or phrases
-        - Poor grammar or syntax in French
-        - Inconsistent terminology
-        - Mixed languages within sentences
-        
-        For each issue found, specify:
-        - The exact problematic text
-        - What the issue is
-        - A suggested correction
-        
-        IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
-        "Quality Score: XX%"
-        
-        Text to analyze:
-        {text}
-        """
-    else:  # Arabic
-        prompt = f"""
-        Role: You are an expert Arabic translator and proofreader.
+    # Use custom prompt if provided, otherwise use default
+    if custom_prompt:
+        prompt = custom_prompt.format(text=text)
+    else:
+        if target_language == "French":
+            prompt = f"""
+            Please analyze the following text and check if it is properly translated to French.
+            Look for:
+            - Untranslated English words or phrases
+            - Poor grammar or syntax in French
+            - Inconsistent terminology
+            - Mixed languages within sentences
+            
+            For each issue found, specify:
+            - The exact problematic text
+            - What the issue is
+            - A suggested correction
+            
+            IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+            "Quality Score: XX%"
+            
+            Text to analyze:
+            {text}
+            """
+        elif target_language == "Portuguese":
+            prompt = f"""
+            Please analyze the following text and check if it is properly translated to Portuguese.
+            Look for:
+            - Untranslated English words or phrases
+            - Poor grammar or syntax in Portuguese
+            - Inconsistent terminology
+            - Mixed languages within sentences
+            - Proper use of Portuguese accents and diacritics
+            - Correct verb conjugations and gender agreements
+            
+            For each issue found, specify:
+            - The exact problematic text
+            - What the issue is
+            - A suggested correction in proper Portuguese
+            
+            IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+            "Quality Score: XX%"
+            
+            Text to analyze:
+            {text}
+            """
+        else:  # Arabic
+            prompt = f"""
+            Role: You are an expert Arabic translator and proofreader.
 
-        Task:
-        - Detect the source text language and confirm it's translated to Arabic
-        - Carefully proofread the Arabic text for accuracy and fluency
-        - Identify every error, awkward phrasing, or mistranslation
-        
-        For each issue found:
-        - Mark the problematic Arabic text clearly
-        - Explain why it's incorrect
-        - Provide a proper Arabic correction
-        
-        IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
-        "Quality Score: XX%"
+            Task:
+            - Detect the source text language and confirm it's translated to Arabic
+            - Carefully proofread the Arabic text for accuracy and fluency
+            - Identify every error, awkward phrasing, or mistranslation
+            
+            For each issue found:
+            - Mark the problematic Arabic text clearly
+            - Explain why it's incorrect
+            - Provide a proper Arabic correction
+            
+            IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+            "Quality Score: XX%"
 
-        Text to analyze:
-        {text}
-        """
+            Text to analyze:
+            {text}
+            """
     
     try:
         logger.info(f"Sending request to Claude API (Chunk {chunk_id})")
@@ -265,7 +295,7 @@ def check_translation_claude(text: str, target_language: str, chunk_id: int) -> 
             'chunk_id': chunk_id
         }
 
-def process_all_chunks_async(chunks: List[Dict[str, Any]], target_language: str) -> List[Dict[str, Any]]:
+def process_all_chunks_async(chunks: List[Dict[str, Any]], target_language: str, custom_prompt: str = None) -> List[Dict[str, Any]]:
     """Process all chunks concurrently using ThreadPoolExecutor."""
     logger.info(f"Starting concurrent processing of {len(chunks)} chunks")
     
@@ -283,11 +313,11 @@ def process_all_chunks_async(chunks: List[Dict[str, Any]], target_language: str)
             chunk_id = i + 1
             
             # Submit OpenAI task
-            openai_future = executor.submit(check_translation_openai, chunk['text'], target_language, chunk_id)
+            openai_future = executor.submit(check_translation_openai, chunk['text'], target_language, chunk_id, custom_prompt)
             openai_futures.append((openai_future, chunk_id, chunk))
             
             # Submit Claude task
-            claude_future = executor.submit(check_translation_claude, chunk['text'], target_language, chunk_id)
+            claude_future = executor.submit(check_translation_claude, chunk['text'], target_language, chunk_id, custom_prompt)
             claude_futures.append((claude_future, chunk_id, chunk))
         
         logger.info(f"Submitted {len(openai_futures)} OpenAI tasks and {len(claude_futures)} Claude tasks")
@@ -351,7 +381,7 @@ def main():
         # Language selection
         target_language = st.selectbox(
             "Select target language:",
-            ["French", "Arabic"],
+            ["French", "Arabic", "Portuguese"],
             help="Choose the language you want to check the translation for"
         )
         
@@ -359,11 +389,88 @@ def main():
             st.info("🤖 Using OpenAI GPT-4 for French translation analysis")
         elif target_language == "Arabic":
             st.info("🤖 Using Claude for Arabic translation analysis")
+        elif target_language == "Portuguese":
+            st.info("🤖 Using both OpenAI GPT-4 and Claude for Portuguese translation analysis")
             
         st.success("✅ API keys configured from secrets")
         
         # Performance info
         st.info("⚡ Using concurrent processing for faster analysis")
+        
+        # Prompt customization section
+        st.header("🎯 Prompt Customization")
+        
+        # Get default prompt based on selected language
+        if target_language == "French":
+            default_prompt = """Please analyze the following text and check if it is properly translated to French.
+Look for:
+- Untranslated English words or phrases
+- Poor grammar or syntax in French
+- Inconsistent terminology
+- Mixed languages within sentences
+
+For each issue found, specify:
+- The exact problematic text
+- What the issue is
+- A suggested correction
+
+IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+"Quality Score: XX%"
+
+Text to analyze:
+{text}"""
+        elif target_language == "Portuguese":
+            default_prompt = """Please analyze the following text and check if it is properly translated to Portuguese.
+Look for:
+- Untranslated English words or phrases
+- Poor grammar or syntax in Portuguese
+- Inconsistent terminology
+- Mixed languages within sentences
+- Proper use of Portuguese accents and diacritics
+- Correct verb conjugations and gender agreements
+
+For each issue found, specify:
+- The exact problematic text
+- What the issue is
+- A suggested correction in proper Portuguese
+
+IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+"Quality Score: XX%"
+
+Text to analyze:
+{text}"""
+        else:  # Arabic
+            default_prompt = """Role: You are an expert Arabic translator and proofreader.
+
+Task:
+- Detect the source text language and confirm it's translated to Arabic
+- Carefully proofread the Arabic text for accuracy and fluency
+- Identify every error, awkward phrasing, or mistranslation
+
+For each issue found:
+- Mark the problematic Arabic text clearly
+- Explain why it's incorrect
+- Provide a proper Arabic correction
+
+IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
+"Quality Score: XX%"
+
+Text to analyze:
+{text}"""
+        
+        # Allow users to customize the prompt
+        custom_prompt = st.text_area(
+            f"📝 Customize your {target_language} analysis prompt:",
+            value=default_prompt,
+            height=300,
+            help="Modify this prompt to customize how the AI analyzes your text. The {text} placeholder will be replaced with each chunk of your document."
+        )
+        
+        # Show a warning if prompt is modified
+        if custom_prompt != default_prompt:
+            st.warning("⚠️ Custom prompt detected! The AI will use your modified prompt for analysis.")
+        else:
+            st.success("✅ Using default optimized prompt")
     
     # File upload
     uploaded_file = st.file_uploader(
@@ -405,7 +512,7 @@ def main():
                 status_text.text(f"🚀 Processing {len(chunks)} chunks concurrently with both AI models...")
                 logger.info(f"Starting concurrent processing of {len(chunks)} chunks")
                 
-                results, openai_scores, claude_scores = process_all_chunks_async(chunks, target_language)
+                results, openai_scores, claude_scores = process_all_chunks_async(chunks, target_language, custom_prompt)
                 
                 status_text.text("Analysis complete!")
                 progress_bar.progress(100)
