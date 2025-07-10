@@ -216,19 +216,24 @@ def check_translation_claude(text: str, target_language: str, chunk_id: int, cus
             """
         elif target_language == "Portuguese":
             prompt = f"""
-            Please analyze the following text and check if it is properly translated to Portuguese.
+            Please analyze the following text and check if it is properly translated to European Portuguese (Portugal Portuguese).
             Look for:
             - Untranslated English words or phrases
-            - Poor grammar or syntax in Portuguese
+            - Poor grammar or syntax in European Portuguese
             - Inconsistent terminology
             - Mixed languages within sentences
-            - Proper use of Portuguese accents and diacritics
-            - Correct verb conjugations and gender agreements
+            - Proper use of Portuguese accents and diacritics (European Portuguese standards)
+            - Correct verb conjugations and gender agreements (European Portuguese forms)
+            - European Portuguese vocabulary and expressions (not Brazilian Portuguese)
+            - Proper use of "tu" vs "você" according to European Portuguese conventions
+            - Correct placement of clitic pronouns (European Portuguese style)
+            - English terms or anglicisms used in PT-PT: verify if their usage is officially recognized or recommended in Portugal, or if there is an official Portuguese equivalent suggested by credible sources (e.g., Portal da Língua Portuguesa, Priberam, Academia das Ciências de Lisboa, Terminologia do Estado)
             
             For each issue found, specify:
             - The exact problematic text
             - What the issue is
-            - A suggested correction in proper Portuguese
+            - A suggested correction in proper European Portuguese
+            - For anglicisms: indicate if the English term is officially accepted in PT-PT or provide the recommended Portuguese equivalent from official sources
             
             IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
             "Quality Score: XX%"
@@ -420,19 +425,24 @@ IMPORTANT: At the end of your analysis, provide a numerical quality score as a p
 Text to analyze:
 {text}"""
         elif target_language == "Portuguese":
-            default_prompt = """Please analyze the following text and check if it is properly translated to Portuguese.
+            default_prompt = """Please analyze the following text and check if it is properly translated to European Portuguese (Portugal Portuguese).
 Look for:
 - Untranslated English words or phrases
-- Poor grammar or syntax in Portuguese
+- Poor grammar or syntax in European Portuguese
 - Inconsistent terminology
 - Mixed languages within sentences
-- Proper use of Portuguese accents and diacritics
-- Correct verb conjugations and gender agreements
+- Proper use of Portuguese accents and diacritics (European Portuguese standards)
+- Correct verb conjugations and gender agreements (European Portuguese forms)
+- European Portuguese vocabulary and expressions (not Brazilian Portuguese)
+- Proper use of "tu" vs "você" according to European Portuguese conventions
+- Correct placement of clitic pronouns (European Portuguese style)
+- English terms or anglicisms used in PT-PT: verify if their usage is officially recognized or recommended in Portugal, or if there is an official Portuguese equivalent suggested by credible sources (e.g., Portal da Língua Portuguesa, Priberam, Academia das Ciências de Lisboa, Terminologia do Estado)
 
 For each issue found, specify:
 - The exact problematic text
 - What the issue is
-- A suggested correction in proper Portuguese
+- A suggested correction in proper European Portuguese
+- For anglicisms: indicate if the English term is officially accepted in PT-PT or provide the recommended Portuguese equivalent from official sources
 
 IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
 "Quality Score: XX%"
