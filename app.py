@@ -243,18 +243,50 @@ def check_translation_claude(text: str, target_language: str, chunk_id: int, cus
             """
         else:  # Arabic
             prompt = f"""
-            Role: You are an expert Arabic translator and proofreader.
+            Role: You are an expert Modern Standard Arabic (MSA) translator and proofreader with extensive knowledge of فصحى العصر.
 
-            Task:
-            - Detect the source text language and confirm it's translated to Arabic
-            - Carefully proofread the Arabic text for accuracy and fluency
-            - Identify every error, awkward phrasing, or mistranslation
-            
-            For each issue found:
-            - Mark the problematic Arabic text clearly
-            - Explain why it's incorrect
-            - Provide a proper Arabic correction
-            
+            Task: Conduct a comprehensive and strict analysis of the Arabic translation quality, focusing exclusively on Modern Standard Arabic standards.
+
+            Analyze the following areas with maximum strictness:
+
+            LINGUISTIC ACCURACY:
+            - Verify adherence to Modern Standard Arabic (فصحى العصر) grammar rules
+            - Check proper use of إعراب (grammatical case endings) where required
+            - Identify any dialectal Arabic or colloquial expressions that should be MSA
+            - Verify correct verb conjugations, noun declensions, and adjective agreements
+            - Check for proper use of الفعل المضارع والماضي والأمر (present, past, imperative verbs)
+
+            ORTHOGRAPHIC PRECISION:
+            - Verify correct use of Arabic diacritics (تشكيل) where necessary for clarity
+            - Check proper spelling of همزة (hamza) in all positions
+            - Verify correct use of تاء مربوطة vs تاء مفتوحة
+            - Identify missing or incorrect الف المقصورة vs الف الممدودة
+            - Check for proper use of Arabic punctuation marks
+
+            LEXICAL AUTHENTICITY:
+            - Identify untranslated foreign words that have established Arabic equivalents
+            - Flag inappropriate use of borrowed terms when pure Arabic alternatives exist
+            - Verify use of authentic Arabic terminology vs foreign loanwords
+            - Check for consistency in technical and specialized terminology
+
+            SYNTACTIC STRUCTURE:
+            - Verify proper Arabic sentence structure (فعل فاعل مفعول به)
+            - Check for appropriate use of الجملة الاسمية والفعلية (nominal and verbal sentences)
+            - Identify awkward calques from source language syntax
+            - Verify proper use of Arabic conjunctions and discourse markers
+
+            SEMANTIC ACCURACY:
+            - Identify mistranslations or semantic errors
+            - Flag culturally inappropriate expressions for Arabic-speaking contexts
+            - Check for proper register (formal/informal) appropriate to MSA
+            - Verify contextual appropriateness of chosen vocabulary
+
+            For each error found, provide:
+            - The exact problematic Arabic text (highlighted)
+            - Detailed explanation of the specific error type
+            - The correct MSA alternative with proper تشكيل if needed
+            - Brief justification based on Arabic grammar rules or MSA standards
+
             IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
             "Quality Score: XX%"
 
@@ -450,17 +482,49 @@ IMPORTANT: At the end of your analysis, provide a numerical quality score as a p
 Text to analyze:
 {text}"""
         else:  # Arabic
-            default_prompt = """Role: You are an expert Arabic translator and proofreader.
+            default_prompt = """Role: You are an expert Modern Standard Arabic (MSA) translator and proofreader with extensive knowledge of فصحى العصر.
 
-Task:
-- Detect the source text language and confirm it's translated to Arabic
-- Carefully proofread the Arabic text for accuracy and fluency
-- Identify every error, awkward phrasing, or mistranslation
+Task: Conduct a comprehensive and strict analysis of the Arabic translation quality, focusing exclusively on Modern Standard Arabic standards.
 
-For each issue found:
-- Mark the problematic Arabic text clearly
-- Explain why it's incorrect
-- Provide a proper Arabic correction
+Analyze the following areas with maximum strictness:
+
+LINGUISTIC ACCURACY:
+- Verify adherence to Modern Standard Arabic (فصحى العصر) grammar rules
+- Check proper use of إعراب (grammatical case endings) where required
+- Identify any dialectal Arabic or colloquial expressions that should be MSA
+- Verify correct verb conjugations, noun declensions, and adjective agreements
+- Check for proper use of الفعل المضارع والماضي والأمر (present, past, imperative verbs)
+
+ORTHOGRAPHIC PRECISION:
+- Verify correct use of Arabic diacritics (تشكيل) where necessary for clarity
+- Check proper spelling of همزة (hamza) in all positions
+- Verify correct use of تاء مربوطة vs تاء مفتوحة
+- Identify missing or incorrect الف المقصورة vs الف الممدودة
+- Check for proper use of Arabic punctuation marks
+
+LEXICAL AUTHENTICITY:
+- Identify untranslated foreign words that have established Arabic equivalents
+- Flag inappropriate use of borrowed terms when pure Arabic alternatives exist
+- Verify use of authentic Arabic terminology vs foreign loanwords
+- Check for consistency in technical and specialized terminology
+
+SYNTACTIC STRUCTURE:
+- Verify proper Arabic sentence structure (فعل فاعل مفعول به)
+- Check for appropriate use of الجملة الاسمية والفعلية (nominal and verbal sentences)
+- Identify awkward calques from source language syntax
+- Verify proper use of Arabic conjunctions and discourse markers
+
+SEMANTIC ACCURACY:
+- Identify mistranslations or semantic errors
+- Flag culturally inappropriate expressions for Arabic-speaking contexts
+- Check for proper register (formal/informal) appropriate to MSA
+- Verify contextual appropriateness of chosen vocabulary
+
+For each error found, provide:
+- The exact problematic Arabic text (highlighted)
+- Detailed explanation of the specific error type
+- The correct MSA alternative with proper تشكيل if needed
+- Brief justification based on Arabic grammar rules or MSA standards
 
 IMPORTANT: At the end of your analysis, provide a numerical quality score as a percentage (0-100%) in this exact format:
 "Quality Score: XX%"
